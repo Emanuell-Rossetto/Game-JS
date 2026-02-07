@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Base de jogo Canvas</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      background: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<script>
+  // 1. Canvas
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  // 2. Estado do jogador
+  const player = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 20,
+    speed: 4
+  };
+
+  // 3. Input do mouse
+  const mouse = {
+    x: player.x,
+    y: player.y
+  };
+
+  window.addEventListener("mousemove", (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
+
+  // 4. Atualização do jogo
+  function update() {
+    const dx = mouse.x - player.x;
+    const dy = mouse.y - player.y;
+
+    const distance = Math.hypot(dx, dy);
+
+    if (distance > 1) {
+      player.x += (dx / distance) * player.speed;
+      player.y += (dy / distance) * player.speed;
+    }
+  }
+
+// Array de armazenamento
+const armazenamento = [];
+
+  function test_gen() {
+      armazenamento.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: 10
+      });
+  }
+
+  setInterval(test_gen, 1000);
+
+
+  // 5. Renderização
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (const obj of armazenamento) {
+      ctx.beginPath();
+      ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
+      ctx.fillStyle = "#e74c3c";
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "#3498db";
+    ctx.fill();
+    // Desenhar os objetos do armazenamento
+    
+  }
+
+  // 6. Game loop
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+</script>
+
+</body>
+</html>

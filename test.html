@@ -26,12 +26,26 @@
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
+
+  // MAPA
+
+const world = {
+  width: 5000,
+  height: 5000
+};
+
+let camera = {
+  x: 0,
+  y: 0
+};
+
   // 2. Estado do jogador
   const player = {
     x: canvas.width / 2,
     y: canvas.height / 2,
     radius: 20,
-    speed: 4
+    speed: 4,
+    food: 0
   };
 
   // 3. Input do mouse
@@ -56,6 +70,12 @@
       player.x += (dx / distance) * player.speed;
       player.y += (dy / distance) * player.speed;
     }
+    player.x += player.vx;
+    player.y += player.vy;
+
+  // câmera segue o player
+    camera.x = player.x - canvas.width / 2;
+    camera.y = player.y - canvas.height / 2;
   }
 
 // Array de armazenamento
@@ -69,8 +89,26 @@ const armazenamento = [];
       });
   }
 
-  setInterval(test_gen, 1000);
+  setInterval(test_gen, 1000); //---------------------------- Gerar um novo objeto a cada segundo
 
+
+function colisao(){
+  for (let i = armazenamento.length - 1; i >= 0; i--) {
+    const obj = armazenamento[i];
+    const dx = player.x - obj.x;
+    const dy = player.y - obj.y;
+    const distance = Math.hypot(dx, dy);
+
+    if (distance < player.radius + obj.radius) {
+      // Colisão detectada, remover o objeto do armazenamento
+      armazenamento.splice(i, 1);
+      const k = 2;        // ganho base
+      const alpha = 0.02; // desaceleração
+      const ganho = k / (1 + alpha * player.radius);
+      player.radius += ganho;
+    }
+  }
+}
 
   // 5. Renderização
   function draw() {
@@ -84,7 +122,13 @@ const armazenamento = [];
     }
 
     ctx.beginPath();
-    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+    ctx.arc(
+    player.x - camera.x,
+    player.y - camera.y,
+    player.radius,
+    0,
+    Math.PI * 2
+    );
     ctx.fillStyle = "#3498db";
     ctx.fill();
     // Desenhar os objetos do armazenamento
@@ -95,6 +139,7 @@ const armazenamento = [];
   function loop() {
     update();
     draw();
+    colisao();
     requestAnimationFrame(loop);
   }
 
